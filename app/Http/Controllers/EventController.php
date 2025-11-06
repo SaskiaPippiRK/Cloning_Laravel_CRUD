@@ -47,16 +47,16 @@ class EventController extends Controller
             'quota'      => 'required|numeric'
         ]);
 
-        Event::create([
-            'event_name' => $request->event_name,
-            'location'   => $request->location,
-            'quota'      => $request->quota
-        ]);
-
         try {
+            Event::create([
+                'event_name' => $request->event_name,
+                'location'   => $request->location,
+                'quota'      => $request->quota
+            ]);
+
             return redirect()->route('event.index')->with(['success' => 'Data Berhasil Disimpan!']);
         } catch (Exception $e) {
-            return redirect()->route('event.index')->with(['error' => $e->getMessage()]);
+            return redirect()->route('event.index')->with(['error' => 'Data Gagal Disimpan!']);
         }
     }
 
@@ -69,6 +69,11 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::find($id);
+        
+        if (!$event) {
+            return redirect()->route('event.index')->with(['error' => 'Event tidak ditemukan!']);
+        }
+        
         return view('event.edit', compact('event'));
     }
 
@@ -83,19 +88,27 @@ class EventController extends Controller
     {
         $event = Event::find($id);
         
+        if (!$event) {
+            return redirect()->route('event.index')->with(['error' => 'Event tidak ditemukan!']);
+        }
+
         $this->validate($request, [
             'event_name' => 'required',
             'location'   => 'required',
             'quota'      => 'required|numeric'
         ]);
 
-        $event->update([
-            'event_name' => $request->event_name,
-            'location'   => $request->location,
-            'quota'      => $request->quota
-        ]);
+        try {
+            $event->update([
+                'event_name' => $request->event_name,
+                'location'   => $request->location,
+                'quota'      => $request->quota
+            ]);
 
-        return redirect()->route('event.index')->with(['success' => 'Data Berhasil Diubah!']);
+            return redirect()->route('event.index')->with(['success' => 'Data Berhasil Diubah!']);
+        } catch (Exception $e) {
+            return redirect()->route('event.index')->with(['error' => 'Data Gagal Diubah!']);
+        }
     }
 
     /**
@@ -108,8 +121,15 @@ class EventController extends Controller
     {
         $event = Event::find($id);
         
-        $event->delete();
+        if (!$event) {
+            return redirect()->route('event.index')->with(['error' => 'Event tidak ditemukan!']);
+        }
 
-        return redirect()->route('event.index')->with(['success' => 'Data Berhasil Dihapus!']);
+        try {
+            $event->delete();
+            return redirect()->route('event.index')->with(['success' => 'Data Berhasil Dihapus!']);
+        } catch (Exception $e) {
+            return redirect()->route('event.index')->with(['error' => 'Data Gagal Dihapus!']);
+        }
     }
 }
